@@ -1,11 +1,12 @@
 from flask import Flask, render_template, request, jsonify, make_response
-import json
+import json, requests
 from werkzeug.exceptions import NotFound
 
 app = Flask(__name__)
 
 PORT = 3202
 HOST = '0.0.0.0'
+MOVIE_URL   = "http://localhost:3200" # service Movie
 
 # charge le fichier JSON contenant le planning
 with open('{}/databases/times.json'.format("."), "r") as jsf:
@@ -37,6 +38,29 @@ def get_movies_by_date(date):
             res = make_response(jsonify(movies_date["movies"]),200) # renvoi tous les movies direct suivant la date
             return res
     return make_response(jsonify({"error":"No movies found with this date"}),500)
+
+# récupère les films programmés pour une date avec leurs détails
+@app.route("/schedule/<date>/details", methods=['GET'])
+def get_movies_by_date_details(date):
+    for movies_date in schedule:
+        if str(movies_date["date"]) == str(date):
+            movies_detail = []
+            for movie_id in movies_date["movies"]:
+                try:
+                    r = requests.get(f"{MOVIE_URL}/movies/{movie_id}")
+                    if r.status_code == 200:
+                        movies_detail.append(r.json())
+                    else:
+                        movies_detail.append({"id": movie_id, "error": "movie not found"})
+                except requests.exceptions.RequestException:
+                    movies_detail.append({"id": movie_id, "error": "movie service unreachable"})
+
+            return make_response(jsonify({
+                "date": date,
+                "movies": movies_detail
+            }), 200)
+
+    return make_response(jsonify({"error": "date not found"}), 404)
 
 # récupère toutes les dates où un film est projeté (via son ID en query param)
 @app.route("/schedule", methods=['GET'])
