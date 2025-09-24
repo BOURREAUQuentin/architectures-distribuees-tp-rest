@@ -1,12 +1,15 @@
 from flask import Flask, render_template, request, jsonify, make_response
 from flasgger import Swagger
 import json
+import requests
 
 app = Flask(__name__)
 swagger = Swagger(app)
 
 PORT = 3201
 HOST = '0.0.0.0'
+
+BOOKING_URL = "http://localhost:3203" # service Booking
 
 # charge le fichier JSON contenant les utilisateurs
 with open('./databases/users.json', "r") as jsf:
@@ -133,6 +136,29 @@ def get_user_byname():
     else:
         res = make_response(jsonify(json_res), 200)
     return res
+
+# récupère les noms des utilisateurs qui ont une réservation d'un film pour une certaine date
+@app.route("/users/getusersfrombooking", methods=["GET"])
+def get_user_from_booking():
+    req = request.get_json()
+    date = req.get("date")
+    movie_id = req.get("movie")
+    user_list = []
+    r = requests.get(f"{BOOKING_URL}/bookings") # appele microservice de Booking
+    data = r.json()
+    
+    for b in data:
+        for d in b["dates"]:
+            if d["date"] == date:
+                for m in d["movies"]:
+                    if m == movie_id:
+                        name = next((u["name"] for u in users if u["id"] == b["userid"]), None)
+                        if name is None:
+                          return make_response(jsonify({"error": "The user does not exist"}), 404)
+                        user_list.append(name)
+    return make_response(jsonify({
+        "users": user_list
+    }), 200)
 
 # ajoute un utilisateur
 @app.route("/users/<userid>", methods=['POST'])
