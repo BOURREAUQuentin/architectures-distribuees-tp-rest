@@ -5,7 +5,7 @@ from werkzeug.exceptions import NotFound
 
 app = Flask(__name__)
 
-PORT = 3201
+PORT = 3203
 HOST = '0.0.0.0'
 SCHEDULE_URL = "http://localhost:3202" # service Schedule
 MOVIE_URL   = "http://localhost:3200" # service Movie

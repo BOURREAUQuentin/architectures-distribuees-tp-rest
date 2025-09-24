@@ -5,16 +5,19 @@ import json
 app = Flask(__name__)
 swagger = Swagger(app)
 
-PORT = 3203
+PORT = 3201
 HOST = '0.0.0.0'
 
+# charge le fichier JSON contenant les utilisateurs
 with open('./databases/users.json', "r") as jsf:
     users = json.load(jsf)["users"]
 
+# sauvegarde les utilisateurs dans le fichier
 def write(users):
     with open('./databases/users.json', 'w') as f:
         json.dump({"users": users}, f)
 
+# page d’accueil du service
 @app.route("/", methods=['GET'])
 def home():
     """
@@ -30,7 +33,8 @@ def home():
     """
     return "<h1 style='color:blue'>Welcome to the User service!</h1>"
 
-@app.route("/json", methods=['GET'])
+# retourne tous les utilisateurs en JSON brut
+@app.route("/users/json", methods=['GET'])
 def get_json():
     """
     Get all users
@@ -54,6 +58,7 @@ def get_json():
     """
     return jsonify(users)
 
+# retourne un utilisateur à partir de son ID
 @app.route("/users/<userid>", methods=['GET'])
 def get_user_byid(userid):
     """
@@ -87,7 +92,8 @@ def get_user_byid(userid):
             return jsonify(user), 200
     return jsonify({"error": "User ID not found"}), 404
 
-@app.route("/userbyname", methods=['GET'])
+# retourne un utilisateur à partir de son nom
+@app.route("/users/userbyname", methods=['GET'])
 def get_user_byname():
     """
     Get user by name
@@ -127,7 +133,8 @@ def get_user_byname():
     else:
         res = make_response(jsonify(json_res), 200)
     return res
-  
+
+# ajoute un utilisateur
 @app.route("/users/<userid>", methods=['POST'])
 def add_user(userid):
     """
@@ -167,7 +174,8 @@ def add_user(userid):
     users.append(req)
     write(users)
     return make_response(jsonify({"message": "User added"}), 200)
-  
+
+# modifie le nom de l'utilisateur à partir de son ID
 @app.route("/users/<userid>/<name>", methods=['PUT'])
 def update_user_name(userid, name):
     """
@@ -209,6 +217,7 @@ def update_user_name(userid, name):
 
     return make_response(jsonify({"error": "user ID not found"}), 500)
 
+# supprime un utilisateur
 @app.route("/users/<userid>", methods=['DELETE'])
 def del_user(userid):
     """

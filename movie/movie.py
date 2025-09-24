@@ -8,26 +8,30 @@ app = Flask(__name__)
 PORT = 3200
 HOST = '0.0.0.0'
 
+# charge le fichier JSON contenant les films
 with open('{}/databases/movies.json'.format("."), 'r') as jsf:
     movies = json.load(jsf)["movies"]
     print(movies)
 
+# sauvegarde les films dans le fichier
 def write(movies):
     with open('{}/databases/movies.json'.format("."), 'w') as f:
         full = {}
         full['movies']=movies
         json.dump(full, f)
 
-# root message
+# page d’accueil du service
 @app.route("/", methods=['GET'])
 def home():
     return make_response("<h1 style='color:blue'>Welcome to the Movie service!</h1>",200)
 
-@app.route("/json", methods=['GET'])
+# retourne tous les films en JSON brut
+@app.route("/movies/json", methods=['GET'])
 def get_json():
     res = make_response(jsonify(movies), 200)
     return res
 
+# retourne un film à partir de son ID
 @app.route("/movies/<movieid>", methods=['GET'])
 def get_movie_byid(movieid):
     for movie in movies:
@@ -36,7 +40,8 @@ def get_movie_byid(movieid):
             return res
     return make_response(jsonify({"error":"Movie ID not found"}),500)
 
-@app.route("/moviesbytitle", methods=['GET'])
+# retourne un film à partir de son titre
+@app.route("/movies/moviebytitle", methods=['GET'])
 def get_movie_bytitle():
     json = ""
     if request.args:
@@ -51,6 +56,7 @@ def get_movie_bytitle():
         res = make_response(jsonify(json),200)
     return res
 
+# ajoute un nouveau film
 @app.route("/movies/<movieid>", methods=['POST'])
 def add_movie(movieid):
     req = request.get_json()
@@ -66,6 +72,7 @@ def add_movie(movieid):
     res = make_response(jsonify({"message":"movie added"}),200)
     return res
 
+#modifie le score d'un film existant
 @app.route("/movies/<movieid>/<rate>", methods=['PUT'])
 def update_movie_rating(movieid, rate):
     for movie in movies:
@@ -78,6 +85,7 @@ def update_movie_rating(movieid, rate):
     res = make_response(jsonify({"error":"movie ID not found"}),500)
     return res
 
+# supprime un film à partir de son ID
 @app.route("/movies/<movieid>", methods=['DELETE'])
 def del_movie(movieid):
     for movie in movies:
