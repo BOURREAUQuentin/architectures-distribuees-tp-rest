@@ -1,8 +1,11 @@
 from flask import Flask, render_template, request, jsonify, make_response
 import requests
 import json, time
+from flask_cors import CORS
 
 app = Flask(__name__)
+
+CORS(app)
 
 PORT = 3203
 HOST = '0.0.0.0'

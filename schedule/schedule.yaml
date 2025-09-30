@@ -24,7 +24,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ScheduleEntry'
         '403':
-          description: Unauthorized: admin access required
+          description: Unauthorized - admin access required
         '401':
           description: Unable to verify user
         '503':
@@ -55,7 +55,7 @@ paths:
                 items:
                   type: string
         '403':
-          description: Unauthorized: admin access required
+          description: Unauthorized - admin access required
         '500':
           description: No movies found with this date
 
@@ -82,7 +82,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ScheduleDateDetails'
         '403':
-          description: Unauthorized: admin access required
+          description: Unauthorized - admin access required
         '404':
           description: Date not found
 
@@ -115,7 +115,7 @@ paths:
                     items:
                       type: string
         '403':
-          description: Unauthorized: admin access required
+          description: Unauthorized - admin access required
         '404':
           description: No schedule found for this movie ID
 
@@ -148,7 +148,7 @@ paths:
         '200':
           description: Schedule date added
         '403':
-          description: Unauthorized: admin access required
+          description: Unauthorized - admin access required
         '500':
           description: Schedule date already exists
 
@@ -169,7 +169,7 @@ paths:
         '200':
           description: Schedule date deleted
         '403':
-          description: Unauthorized: admin access required
+          description: Unauthorized - admin access required
         '404':
           description: Date not found
 
@@ -200,7 +200,7 @@ paths:
         '200':
           description: Movie added
         '403':
-          description: Unauthorized: admin access required
+          description: Unauthorized - admin access required
         '400':
           description: Missing movie_id
         '500':
@@ -229,7 +229,7 @@ paths:
         '200':
           description: Movie removed from date
         '403':
-          description: Unauthorized: admin access required
+          description: Unauthorized - admin access required
         '404':
           description: Movie or date not found
 
@@ -251,7 +251,7 @@ paths:
         '200':
           description: Movie removed from all dates
         '403':
-          description: Unauthorized: admin access required
+          description: Unauthorized - admin access required
         '404':
           description: Movie not found in any date
 

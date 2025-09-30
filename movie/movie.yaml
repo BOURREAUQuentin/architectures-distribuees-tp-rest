@@ -80,7 +80,7 @@ paths:
         '200':
           description: Movie added
         '403':
-          description: Unauthorized: admin access required
+          description: Unauthorized - admin access required
         '500':
           description: Movie ID already exists
 
@@ -131,7 +131,7 @@ paths:
         '200':
           description: Movie deleted
         '403':
-          description: Unauthorized: admin access required
+          description: Unauthorized - admin access required
         '500':
           description: Movie ID not found
 

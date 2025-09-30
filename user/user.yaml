@@ -50,7 +50,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/User'
         '403':
-          description: Unauthorized: admin access required
+          description: Unauthorized - admin access required
         '401':
           description: Unable to verify user
         '503':
@@ -78,7 +78,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/User'
         '403':
-          description: Unauthorized: admin access required
+          description: Unauthorized - admin access required
         '404':
           description: User ID not found
 
@@ -105,7 +105,7 @@ paths:
         '200':
           description: User added successfully
         '403':
-          description: Unauthorized: admin access required
+          description: Unauthorized - admin access required
         '500':
           description: User ID already exists
 
@@ -126,7 +126,7 @@ paths:
         '200':
           description: User deleted successfully
         '403':
-          description: Unauthorized: admin access required
+          description: Unauthorized - admin access required
         '500':
           description: User ID not found
 
@@ -157,7 +157,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/User'
         '403':
-          description: Unauthorized: admin access required
+          description: Unauthorized - admin access required
         '500':
           description: User ID not found
 
@@ -183,7 +183,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/User'
         '403':
-          description: Unauthorized: admin access required
+          description: Unauthorized - admin access required
         '500':
           description: User name not found
 
@@ -221,7 +221,7 @@ paths:
                     items:
                       type: string
         '403':
-          description: Unauthorized: admin access required
+          description: Unauthorized - admin access required
         '404':
           description: The user does not exist
 
