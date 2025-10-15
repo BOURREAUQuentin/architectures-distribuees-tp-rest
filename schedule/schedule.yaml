@@ -1,53 +1,62 @@
 openapi: 3.0.3
 info:
   title: Schedule Service API
-  description: API to manage movie schedules, with admin checks via User service and movie details from Movie service.
+  description: >
+    API Flask pour gérer les plannings de films, avec vérification admin via le service User
+    et récupération des détails de films via le service Movie.
   version: 1.0.0
 servers:
   - url: http://localhost:3202
+    description: Local Schedule Service
+
 paths:
   /{user_id}/schedule/json:
     get:
-      summary: Get full schedule in JSON
-      description: Returns the complete schedule. Admin access required.
+      summary: Obtenir tout le planning
+      description: Retourne le planning complet. Accès admin requis.
       parameters:
         - name: user_id
           in: path
           required: true
           schema:
             type: string
+          example: "chris_rivers"
       responses:
         '200':
-          description: Full schedule
+          description: Planning complet
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ScheduleEntry'
-        '403':
-          description: Unauthorized - admin access required
+                type: array
+                items:
+                  $ref: '#/components/schemas/ScheduleEntry'
         '401':
-          description: Unable to verify user
+          description: Impossible de vérifier l’utilisateur
+        '403':
+          description: Accès refusé — admin requis
         '503':
-          description: User service unreachable
+          description: Service User injoignable
 
   /{user_id}/schedule/{date}:
     get:
-      summary: Get movies for a specific date
+      summary: Obtenir les films pour une date spécifique
       parameters:
         - name: user_id
           in: path
           required: true
           schema:
             type: string
+          example: "dwight_schrute"
         - name: date
           in: path
           required: true
           schema:
             type: string
             format: date
+          example: "2025-10-15"
       responses:
         '200':
-          description: List of movie IDs
+          description: Liste d'IDs de films
           content:
             application/json:
               schema:
@@ -55,54 +64,58 @@ paths:
                 items:
                   type: string
         '403':
-          description: Unauthorized - admin access required
+          description: Accès refusé — admin requis
         '500':
-          description: No movies found with this date
+          description: Aucun film trouvé pour cette date
 
   /{user_id}/schedule/{date}/details:
     get:
-      summary: Get movie details for a specific date
+      summary: Obtenir les détails des films pour une date spécifique
       parameters:
         - name: user_id
           in: path
           required: true
           schema:
             type: string
+          example: "dwight_schrute"
         - name: date
           in: path
           required: true
           schema:
             type: string
             format: date
+          example: "2025-10-15"
       responses:
         '200':
-          description: List of movie details for the date
+          description: Détails des films pour la date
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ScheduleDateDetails'
         '403':
-          description: Unauthorized - admin access required
+          description: Accès refusé — admin requis
         '404':
-          description: Date not found
+          description: Date introuvable
 
   /{user_id}/schedule/by_movie:
     get:
-      summary: Get schedule by movie ID
+      summary: Obtenir les dates d’un film par ID
       parameters:
         - name: user_id
           in: path
           required: true
           schema:
             type: string
+          example: "chris_rivers"
         - name: id
           in: query
           required: true
           schema:
             type: string
+          example: "720d006c-3a57-4b6a-b18f-9b713b073f3c"
       responses:
         '200':
-          description: Dates for the given movie
+          description: Dates où le film est programmé
           content:
             application/json:
               schema:
@@ -114,14 +127,17 @@ paths:
                     type: array
                     items:
                       type: string
+              example:
+                movie_id: "720d006c-3a57-4b6a-b18f-9b713b073f3c"
+                dates: ["2025-10-15", "2025-10-16"]
         '403':
-          description: Unauthorized - admin access required
+          description: Accès refusé — admin requis
         '404':
-          description: No schedule found for this movie ID
+          description: Aucun planning trouvé pour ce film
 
   /{user_id}/schedule/{date_id}:
     post:
-      summary: Add a new schedule date
+      summary: Ajouter une nouvelle date de planning
       requestBody:
         required: false
         content:
@@ -146,14 +162,14 @@ paths:
             type: string
       responses:
         '200':
-          description: Schedule date added
+          description: Date ajoutée
         '403':
-          description: Unauthorized - admin access required
+          description: Accès refusé — admin requis
         '500':
-          description: Schedule date already exists
+          description: Date existante
 
     delete:
-      summary: Delete a schedule date
+      summary: Supprimer une date complète
       parameters:
         - name: user_id
           in: path
@@ -167,15 +183,15 @@ paths:
             type: string
       responses:
         '200':
-          description: Schedule date deleted
+          description: Date supprimée
         '403':
-          description: Unauthorized - admin access required
+          description: Accès refusé — admin requis
         '404':
-          description: Date not found
+          description: Date introuvable
 
   /{user_id}/schedule/{date}/movies:
     post:
-      summary: Add a movie to a date
+      summary: Ajouter un film à une date
       requestBody:
         required: true
         content:
@@ -198,17 +214,17 @@ paths:
             type: string
       responses:
         '200':
-          description: Movie added
+          description: Film ajouté
         '403':
-          description: Unauthorized - admin access required
+          description: Accès refusé — admin requis
         '400':
-          description: Missing movie_id
+          description: movie_id manquant
         '500':
-          description: Movie already scheduled for this date
+          description: Film déjà programmé pour cette date
 
   /{user_id}/schedule/{date_id}/movies/{movie_id}:
     delete:
-      summary: Delete a movie from a specific date
+      summary: Supprimer un film d’une date spécifique
       parameters:
         - name: user_id
           in: path
@@ -227,15 +243,15 @@ paths:
             type: string
       responses:
         '200':
-          description: Movie removed from date
+          description: Film supprimé de la date
         '403':
-          description: Unauthorized - admin access required
+          description: Accès refusé — admin requis
         '404':
-          description: Movie or date not found
+          description: Film ou date introuvable
 
   /{user_id}/schedule/movies/{movie_id}:
     delete:
-      summary: Delete a movie from all dates
+      summary: Supprimer un film de toutes les dates
       parameters:
         - name: user_id
           in: path
@@ -249,11 +265,11 @@ paths:
             type: string
       responses:
         '200':
-          description: Movie removed from all dates
+          description: Film supprimé de toutes les dates
         '403':
-          description: Unauthorized - admin access required
+          description: Accès refusé — admin requis
         '404':
-          description: Movie not found in any date
+          description: Film non trouvé dans le planning
 
 components:
   schemas:
@@ -263,20 +279,13 @@ components:
         date:
           type: string
           format: date
+          example: "2025-10-15"
         movies:
           type: array
           items:
             type: string
-    ScheduleDateDetails:
-      type: object
-      properties:
-        date:
-          type: string
-          format: date
-        movies:
-          type: array
-          items:
-            $ref: '#/components/schemas/MovieDetail'
+          example: ["720d006c-3a57-4b6a-b18f-9b713b073f3c", "c4d7f23a-5e2a-4a8e-9d4f-6f1e4b2f8e1b"]
+
     MovieDetail:
       type: object
       properties:
@@ -286,3 +295,20 @@ components:
           type: string
         rating:
           type: number
+          format: float
+      required:
+        - id
+        - title
+        - rating
+
+    ScheduleDateDetails:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+          example: "2025-10-15"
+        movies:
+          type: array
+          items:
+            $ref: '#/components/schemas/MovieDetail'

@@ -1,32 +1,54 @@
 openapi: 3.0.3
 info:
   title: Booking Service API
-  description: API to manage movie bookings, with admin checks via User service and details from Schedule and Movie services.
+  description: API for managing movie bookings, with admin checks via User service and details from Schedule and Movie services.
   version: 1.0.0
 servers:
   - url: http://localhost:3203
+
 paths:
   /{user_id}/bookings:
     get:
       summary: Retrieve all bookings
-      description: Returns all bookings. Admin required.
+      description: Returns all bookings. Admin access required.
       parameters:
         - name: user_id
           in: path
           required: true
           schema:
             type: string
+            example: chris_rivers
       responses:
         '200':
           description: List of all bookings
           content:
             application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Booking'
+              example:
+                - userid: chris_rivers
+                  dates:
+                    - date: "20151201"
+                      movies:
+                        - "267eedb8-0f5d-42d5-8f43-72426b9fb3e6"
+                - userid: garret_heaton
+                  dates:
+                    - date: "20151201"
+                      movies:
+                        - "267eedb8-0f5d-42d5-8f43-72426b9fb3e6"
+                    - date: "20151202"
+                      movies:
+                        - "276c79ec-a26a-40a6-b3d3-fb242a5947b6"
+                - userid: dwight_schrute
+                  dates:
+                    - date: "20151201"
+                      movies:
+                        - "7daf7208-be4d-4944-a3ae-c1c2f516f3e6"
+                        - "267eedb8-0f5d-42d5-8f43-72426b9fb3e6"
+                    - date: "20151205"
+                      movies:
+                        - "a8034f44-aee4-44cf-b32c-74cf452aaaae"
+                        - "276c79ec-a26a-40a6-b3d3-fb242a5947b6"
         '403':
-          description: Unauthorized - admin access required
+          description: Admin access required
         '401':
           description: Unable to verify user
         '503':
@@ -34,152 +56,180 @@ paths:
 
   /{user_id}/bookings/{user_id_wanted}:
     get:
-      summary: Retrieve bookings for a specific user
-      description: Returns all bookings of a user. Admin or self access required.
+      summary: Retrieve bookings for a user
+      description: Admin or self access required.
       parameters:
         - name: user_id
           in: path
           required: true
           schema:
             type: string
+            example: dwight_schrute
         - name: user_id_wanted
           in: path
           required: true
           schema:
             type: string
+            example: garret_heaton
       responses:
         '200':
           description: User bookings
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/Booking'
+              example:
+                userid: garret_heaton
+                dates:
+                  - date: "20151201"
+                    movies:
+                      - "267eedb8-0f5d-42d5-8f43-72426b9fb3e6"
+                  - date: "20151202"
+                    movies:
+                      - "276c79ec-a26a-40a6-b3d3-fb242a5947b6"
         '403':
-          description: Unauthorized - admin access required
+          description: Unauthorized
         '404':
           description: User not found
 
     post:
-      summary: Add a booking for a user
-      description: Adds a booking. Admin or self access required. Checks movie availability in Schedule.
+      summary: Add a booking
+      description: Admin or self access required.
       parameters:
         - name: user_id
           in: path
           required: true
           schema:
             type: string
+            example: dwight_schrute
         - name: user_id_wanted
           in: path
           required: true
           schema:
             type: string
+            example: michael_scott
       requestBody:
         required: true
         content:
           application/json:
-            schema:
-              type: object
-              properties:
-                date:
-                  type: string
-                  format: date
-                movie_id:
-                  type: string
-              required:
-                - date
-                - movie_id
+            example:
+              date: "20151210"
+              movie_id: "a8034f44-aee4-44cf-b32c-74cf452aaaae"
       responses:
         '200':
           description: Booking added
         '400':
           description: Invalid data or booking already exists
         '403':
-          description: Unauthorized - admin access required
+          description: Unauthorized
         '404':
-          description: Date not found in schedule / Movie not available
+          description: Date or movie not available
 
     delete:
-      summary: Delete all bookings of a user
-      description: Deletes all bookings for a user. Admin or self access required.
+      summary: Delete all bookings for a user
+      description: Admin or self access required.
       parameters:
         - name: user_id
           in: path
           required: true
           schema:
             type: string
+            example: chris_rivers
         - name: user_id_wanted
           in: path
           required: true
           schema:
             type: string
+            example: garret_heaton
       responses:
         '200':
-          description: All bookings deleted for the user
+          description: All bookings deleted
         '403':
-          description: Unauthorized - admin access required
+          description: Unauthorized
         '404':
           description: User not found
 
   /{user_id}/bookings/{user_id_wanted}/{date}/{movie_id}:
     delete:
       summary: Delete a specific booking
-      description: Deletes a specific movie booking for a user on a given date. Admin or self access required.
+      description: Admin or self access required.
       parameters:
         - name: user_id
           in: path
           required: true
           schema:
             type: string
+            example: chris_rivers
         - name: user_id_wanted
           in: path
           required: true
           schema:
             type: string
+            example: dwight_schrute
         - name: date
           in: path
           required: true
           schema:
             type: string
             format: date
+            example: "20151201"
         - name: movie_id
           in: path
           required: true
           schema:
             type: string
+            example: "267eedb8-0f5d-42d5-8f43-72426b9fb3e6"
       responses:
         '200':
           description: Booking deleted
         '403':
-          description: Unauthorized - admin access required
+          description: Unauthorized
         '404':
           description: Booking or movie not found
 
   /{user_id}/bookings/{user_id_wanted}/details:
     get:
-      summary: Retrieve user bookings with movie details
-      description: Returns bookings of a user with detailed information from Movie service. Admin or self access required.
+      summary: Retrieve bookings with movie details
+      description: Admin or self access required.
       parameters:
         - name: user_id
           in: path
           required: true
           schema:
             type: string
+            example: chris_rivers
         - name: user_id_wanted
           in: path
           required: true
           schema:
             type: string
+            example: dwight_schrute
       responses:
         '200':
           description: User bookings with movie details
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/BookingDetails'
-        '403':
-          description: Unauthorized - admin access required
-        '404':
-          description: User not found
+              example:
+                userid: dwight_schrute
+                dates:
+                  - date: "20151201"
+                    movies:
+                      - id: "7daf7208-be4d-4944-a3ae-c1c2f516f3e6"
+                        title: "Movie A"
+                        rating: 8.5
+                        director: "Director X"
+                      - id: "267eedb8-0f5d-42d5-8f43-72426b9fb3e6"
+                        title: "Movie B"
+                        rating: 7.2
+                        director: "Director Y"
+                  - date: "20151205"
+                    movies:
+                      - id: "a8034f44-aee4-44cf-b32c-74cf452aaaae"
+                        title: "Movie C"
+                        rating: 6.9
+                        director: "Director Z"
+                      - id: "276c79ec-a26a-40a6-b3d3-fb242a5947b6"
+                        title: "Movie D"
+                        rating: 8.1
+                        director: "Director W"
 
 components:
   schemas:

@@ -1,23 +1,27 @@
 openapi: 3.0.3
 info:
   title: User Service API
-  description: API to manage users with admin verification and integration with Booking service.
+  description: >
+    API Flask pour gérer des utilisateurs avec vérification admin et intégration avec le service Booking.
   version: 1.0.0
 servers:
   - url: http://localhost:3201
+    description: Local User Service
+
 paths:
   /users/{user_id}/is_admin:
     get:
-      summary: Check if a user is admin
+      summary: Vérifier si un utilisateur est admin
       parameters:
         - name: user_id
           in: path
           required: true
           schema:
             type: string
+          example: "chris_rivers"
       responses:
         '200':
-          description: User found and admin status returned
+          description: Statut admin retourné
           content:
             application/json:
               schema:
@@ -27,175 +31,214 @@ paths:
                     type: string
                   is_admin:
                     type: boolean
+              example:
+                id: "chris_rivers"
+                is_admin: true
         '404':
-          description: User ID not found
+          description: Utilisateur introuvable
 
   /{user_id}/users/json:
     get:
-      summary: Get all users
-      description: Returns all users in JSON. Admin access required.
+      summary: Obtenir tous les utilisateurs
+      description: Retourne tous les utilisateurs en JSON. Accès admin requis.
       parameters:
         - name: user_id
           in: path
           required: true
           schema:
             type: string
+          example: "dwight_schrute"
       responses:
         '200':
-          description: List of all users
+          description: Liste des utilisateurs
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/User'
-        '403':
-          description: Unauthorized - admin access required
+              example:
+                - id: "chris_rivers"
+                  name: "Chris Rivers"
+                  is_admin: true
+                - id: "dwight_schrute"
+                  name: "Dwight Schrute"
+                  is_admin: true
         '401':
-          description: Unable to verify user
+          description: Impossible de vérifier l’utilisateur
+        '403':
+          description: Accès refusé — admin requis
         '503':
-          description: User service unreachable
+          description: Service User injoignable
 
   /{user_id}/users/{user_id_wanted}:
     get:
-      summary: Get a user by ID
+      summary: Obtenir un utilisateur par ID
       parameters:
         - name: user_id
           in: path
           required: true
           schema:
             type: string
+          example: "chris_rivers"
         - name: user_id_wanted
           in: path
           required: true
           schema:
             type: string
+          example: "dwight_schrute"
       responses:
         '200':
-          description: User found
+          description: Utilisateur trouvé
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+              example:
+                id: "dwight_schrute"
+                name: "Dwight Schrute"
+                is_admin: true
         '403':
-          description: Unauthorized - admin access required
+          description: Accès refusé — admin requis
         '404':
-          description: User ID not found
+          description: Utilisateur introuvable
 
     post:
-      summary: Add a new user
+      summary: Ajouter un nouvel utilisateur
       parameters:
         - name: user_id
           in: path
           required: true
           schema:
             type: string
+          example: "dwight_schrute"
         - name: user_id_wanted
           in: path
           required: true
           schema:
             type: string
+          example: "new_admin"
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/User'
+            example:
+              id: "new_admin"
+              name: "New Admin"
+              is_admin: true
       responses:
         '200':
-          description: User added successfully
+          description: Utilisateur ajouté
         '403':
-          description: Unauthorized - admin access required
+          description: Accès refusé — admin requis
         '500':
-          description: User ID already exists
+          description: ID déjà existant
 
     delete:
-      summary: Delete a user
+      summary: Supprimer un utilisateur
       parameters:
         - name: user_id
           in: path
           required: true
           schema:
             type: string
+          example: "chris_rivers"
         - name: user_id_wanted
           in: path
           required: true
           schema:
             type: string
+          example: "new_admin"
       responses:
         '200':
-          description: User deleted successfully
+          description: Utilisateur supprimé
         '403':
-          description: Unauthorized - admin access required
+          description: Accès refusé — admin requis
         '500':
-          description: User ID not found
+          description: ID introuvable
 
   /{user_id}/users/{user_id_wanted}/{name}:
     put:
-      summary: Update user's name
+      summary: Modifier le nom d’un utilisateur
       parameters:
         - name: user_id
           in: path
           required: true
           schema:
             type: string
+          example: "dwight_schrute"
         - name: user_id_wanted
           in: path
           required: true
           schema:
             type: string
+          example: "jim_halpert"
         - name: name
           in: path
           required: true
           schema:
             type: string
+          example: "Admin Updated"
       responses:
         '200':
-          description: User name updated
+          description: Nom utilisateur mis à jour
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+              example:
+                id: "new_admin"
+                name: "Admin Updated"
+                is_admin: true
         '403':
-          description: Unauthorized - admin access required
+          description: Accès refusé — admin requis
         '500':
-          description: User ID not found
+          description: ID introuvable
 
   /{user_id}/users/by_name:
     get:
-      summary: Get a user by name
+      summary: Obtenir un utilisateur par nom
       parameters:
         - name: user_id
           in: path
           required: true
           schema:
             type: string
+          example: "chris_rivers"
         - name: name
           in: query
           required: true
           schema:
             type: string
+          example: "Dwight Schrute"
       responses:
         '200':
-          description: User found by name
+          description: Utilisateur trouvé
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+              example:
+                id: "dwight_schrute"
+                name: "Dwight Schrute"
+                is_admin: true
         '403':
-          description: Unauthorized - admin access required
+          description: Accès refusé — admin requis
         '500':
-          description: User name not found
+          description: Nom introuvable
 
   /{user_id}/users/bookings:
     get:
-      summary: Get users who booked a specific movie on a date
+      summary: Obtenir les utilisateurs ayant réservé un film
       parameters:
         - name: user_id
           in: path
           required: true
           schema:
             type: string
+          example: "chris_rivers"
       requestBody:
         required: true
         content:
@@ -206,11 +249,13 @@ paths:
                 date:
                   type: string
                   format: date
+                  example: "2025-10-15"
                 movie:
                   type: string
+                  example: "720d006c-3a57-4b6a-b18f-9b713b073f3c"
       responses:
         '200':
-          description: List of user names
+          description: Liste des noms des utilisateurs
           content:
             application/json:
               schema:
@@ -220,10 +265,12 @@ paths:
                     type: array
                     items:
                       type: string
+              example:
+                users: ["Dwight Schrute", "Chris Rivers"]
         '403':
-          description: Unauthorized - admin access required
+          description: Accès refusé — admin requis
         '404':
-          description: The user does not exist
+          description: L’utilisateur n’existe pas
 
 components:
   schemas:
@@ -232,7 +279,13 @@ components:
       properties:
         id:
           type: string
+          example: "dwight_schrute"
         name:
           type: string
+          example: "Dwight Schrute"
         is_admin:
           type: boolean
+          example: true
+      required:
+        - id
+        - name
