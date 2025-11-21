@@ -2,18 +2,11 @@ from flask import Flask, render_template, request, jsonify, make_response
 import json, time
 import requests
 from flask_cors import CORS
+import config
 
 app = Flask(__name__)
 
 CORS(app)
-
-PORT = 3201
-HOST = '0.0.0.0'
-
-BOOKING_URL = "http://localhost:3203" # service Booking
-USER_URL  = "http://localhost:3201" # microservice User
-
-CACHE_TTL = 60 # secondes de validité du cache pour is_admin
 
 # cache local pour stocker si un user est admin
 # format : { "user_id": {"is_admin": True/False, "timestamp": 123456789} }
@@ -46,12 +39,12 @@ def verify_admin(user_id):
     # vérifie si on a une valeur en cache et qu'elle est encore valide
     if user_id in user_admin_cache:
         cached = user_admin_cache[user_id]
-        if now - cached["timestamp"] < CACHE_TTL:
+        if now - cached["timestamp"] < config.CACHE_TTL:
             return cached["is_admin"], None
 
     # sinon appelle le microservice User
     try:
-        r = requests.get(f"{USER_URL}/users/{user_id}/is_admin")
+        r = requests.get(f"{config.USER_BASE_URL}/users/{user_id}/is_admin")
         if r.status_code == 200:
             data = r.json()
             is_admin = data.get("is_admin", False)
@@ -214,7 +207,7 @@ def get_users_from_booking(user_id):
     date = req.get("date")
     movie_id = req.get("movie")
     user_list = []
-    r = requests.get(f"{BOOKING_URL}/{user_id}/bookings") # appele microservice de Booking
+    r = requests.get(f"{config.BOOKING_BASE_URL}/{user_id}/bookings") # appele microservice de Booking
     data = r.json()
     
     for b in data:
@@ -327,4 +320,4 @@ def delete_user(user_id, user_id_wanted):
     return make_response(jsonify({"error": "user ID not found"}), 500)
 
 if __name__ == "__main__":
-    app.run(host=HOST, port=PORT, debug=True)
+    app.run(host=config.USER_HOST, port=config.USER_PORT, debug=True)
