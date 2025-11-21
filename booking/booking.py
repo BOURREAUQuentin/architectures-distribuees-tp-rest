@@ -2,18 +2,11 @@ from flask import Flask, render_template, request, jsonify, make_response
 import requests
 import json, time
 from flask_cors import CORS
+import config
 
 app = Flask(__name__)
 
 CORS(app)
-
-PORT = 3203
-HOST = '0.0.0.0'
-SCHEDULE_URL = "http://localhost:3202" # service Schedule
-MOVIE_URL   = "http://localhost:3200" # service Movie
-USER_URL  = "http://localhost:3201" # microservice User
-
-CACHE_TTL = 60 # secondes de validité du cache pour is_admin
 
 # cache local pour stocker si un user est admin
 # format : { "user_id": {"is_admin": True/False, "timestamp": 123456789} }
@@ -46,12 +39,12 @@ def verify_admin(user_id):
     # vérifie si on a une valeur en cache et qu'elle est encore valide
     if user_id in user_admin_cache:
         cached = user_admin_cache[user_id]
-        if now - cached["timestamp"] < CACHE_TTL:
+        if now - cached["timestamp"] < config.CACHE_TTL:
             return cached["is_admin"], None
 
     # sinon appelle le microservice User
     try:
-        r = requests.get(f"{USER_URL}/users/{user_id}/is_admin")
+        r = requests.get(f"{config.USER_BASE_URL}/users/{user_id}/is_admin")
         if r.status_code == 200:
             data = r.json()
             is_admin = data.get("is_admin", False)
@@ -161,7 +154,7 @@ def add_booking(user_id, user_id_wanted):
         return make_response(jsonify({"error": "Unauthorized: admin access required"}), 403)
 
     # vérifie auprès de Schedule que le film est dispo à cette date
-    r = requests.get(f"{SCHEDULE_URL}/{user_id}/schedule/{date}") # appele microservice de Schedule
+    r = requests.get(f"{config.SCHEDULE_BASE_URL}/{user_id}/schedule/{date}") # appele microservice de Schedule
     if r.status_code != 200:
         return make_response(jsonify({"error": "date not found in schedule"}), 404)
 
@@ -289,7 +282,7 @@ def get_user_booking_details(user_id, user_id_wanted):
             for d in b["dates"]:
                 movies_detail = []
                 for m in d["movies"]:
-                    r = requests.get(f"{MOVIE_URL}/{user_id}/movies/{m}") # appele microservice de Movie
+                    r = requests.get(f"{config.MOVIE_BASE_URL}/{user_id}/movies/{m}") # appele microservice de Movie
                     if r.status_code == 200:
                         movies_detail.append(r.json())
                     else:
@@ -302,5 +295,5 @@ def get_user_booking_details(user_id, user_id_wanted):
     return make_response(jsonify({"error": "user not found"}), 404)
 
 if __name__ == "__main__":
-   print("Server running in port %s"%(PORT))
-   app.run(host=HOST, port=PORT)
+   print("Server running in port %s"%(config.BOOKING_PORT))
+   app.run(host=config.BOOKING_HOST, port=config.BOOKING_PORT)
