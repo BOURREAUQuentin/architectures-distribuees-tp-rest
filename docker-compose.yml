@@ -1,7 +1,62 @@
 services:
-  movie:
-    build: ./movie/
+  user:
+    build:
+      context: .
+      dockerfile: user/Dockerfile
+    container_name: user
     ports:
-      - "3200:3200"
-  # to continue
+      - "${USER_PORT}:${USER_PORT}"
+    restart: unless-stopped
+    environment:
+      - USER_PORT=${USER_PORT}
+    networks:
+      - microservices-network
 
+  movie:
+    build:
+      context: .
+      dockerfile: movie/Dockerfile
+    container_name: movie
+    ports:
+      - "${MOVIE_PORT}:${MOVIE_PORT}"
+    restart: unless-stopped
+    environment:
+      - MOVIE_PORT=${MOVIE_PORT}
+    depends_on:
+      - schedule
+    networks:
+      - microservices-network
+
+  booking:
+    build:
+      context: .
+      dockerfile: booking/Dockerfile
+    container_name: booking
+    ports:
+      - "${BOOKING_PORT}:${BOOKING_PORT}"
+    restart: unless-stopped
+    environment:
+      - BOOKING_PORT=${BOOKING_PORT}
+    depends_on:
+      - schedule
+      - movie
+      - user
+    networks:
+      - microservices-network
+
+  schedule:
+    build:
+      context: .
+      dockerfile: schedule/Dockerfile
+    container_name: schedule
+    ports:
+      - "${SCHEDULE_PORT}:${SCHEDULE_PORT}"
+    restart: unless-stopped
+    environment:
+      - SCHEDULE_PORT=${SCHEDULE_PORT}
+    networks:
+      - microservices-network
+
+networks:
+  microservices-network:
+    driver: bridge
